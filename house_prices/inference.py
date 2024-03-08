@@ -1,73 +1,60 @@
-def scale_data(data_to_scale,cont_feat):
-    #Scaling is a technique used to normalize the range of independent variables or features of data.
-    # seperate the dataframe  into cont subset
-    data_cont = data_to_scale[cont_feat]
+import pandas as pd
+import numpy as np
+import joblib
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error,mean_squared_log_error,r2_score
+
+# read test data
+test_data = pd.read_csv('../data/house-prices-advanced-regression-techniques/test.csv')
+
+
+def model_analysis(data):
+    data.head()
+    print(f"\nshape of data {data.shape}")
+    print(f"\ndata coloumns : {data.columns}")
+    print(f"\nnull values in each features : {data.isnull().sum()}")
+    print(f"\ndata types of each features : {data.dtypes}")    
+    return
+
+def feature_selection(data):
+    # let's check which features are categorical and which are continuous
+    print("continuous features :\n", data.select_dtypes(include=['int64']).dtypes.head())
+    print("categorical features :\n", data.select_dtypes(include=['object']).dtypes.head())
     
-    def findrange(data):
-        min_values = data.min()
-        max_values = data.max()
+    cate_feat = ['HouseStyle', 'Neighborhood', 'BldgType', 'KitchenQual', 'ExterQual'] 
+    cont_feat = ['OverallQual', 'YearBuilt', 'GrLivArea', 'TotalBsmtSF', 'GarageArea']
+    
+    print("The following features are picked")
+    print("\n categorical features")
+    for feat in cate_feat:
+        print(feat)
+    print("\n continuous features")
+    for feat in cont_feat:
+        print(feat)   
+    
+    print(type(cate_feat))
+    
+    return cate_feat,cont_feat
 
-        feature_ranges = max_values - min_values
-
-        print("Feature Minimums:\n", min_values)
-        print("\nFeature Maximums:\n", max_values)
-        print("\nFeature Ranges:\n", feature_ranges)
+def checkformissingval_in_data(feat,curr_data):
+    # handling missing values
         
-    findrange(data_cont)
-    print(data_cont.head())
-    print(f"\nthe shape of data cont is \n {data_cont.shape}")
-    
-    # scaling cont features
-    scaler = StandardScaler()
-    scaler.fit(data_cont)
-    
-    joblib.dump(scaler, '../models/scaler.joblib')
-    
-    loaded_scaler = joblib.load('../models/scaler.joblib')
-    
-    data_cont_scaled = pd.DataFrame(loaded_scaler.transform(data_cont), columns=data_cont.columns)
-    
-    print("\nlet's see how scaled data looks like:")
-    print(data_cont_scaled.head())
-    print("see if range is reduced or not")
-    findrange(data_cont_scaled)
-    print("shape of data scaled :",data_cont_scaled.shape)
-    
-    return data_cont_scaled
+    for val in feat:
+        count = curr_data[val].isnull().sum()
+        if(count != 0):
+            print(f"Null values in feature {val} is {count}")
+        else:
+            print(f"No null value in feature {val}")
 
-
-def encode_data(data_to_encode,cate_feat,X_train_cate):
-    # Categorical features need to be encoded to numerical values.
-
-    # seperate the dataframe  into categorical subset
-    data_cate = data_to_encode[cate_feat]
-
-    print(data_cate.head())
-
-    print(f"\nthe shape of data to encode is \n {data_cate.shape}")
-    
-    #encoding the categorical values
-    encoder = OneHotEncoder(sparse_output=False, drop='first')  # drop='first' to avoid dummy variable trap
-    joblib.dump(encoder, '../models/encoder.joblib')
-    
-    loaded_encoder = joblib.load('../models/encoder.joblib')
-    loaded_encoder.fit(X_train_cate)
-    
-    data_cate_encoded = pd.DataFrame(loaded_encoder.transform(data_cate),
-                                    columns=loaded_encoder.get_feature_names_out(data_cate.columns))
-    print(f"\nthe shape after encoding   \n {data_cate_encoded.shape}")
-    
-    print("see if the data is encoded or not")
-    print(data_cate_encoded.head())
-    
-    return data_cate_encoded
 
 def imputation(test_data):
     test_data['TotalBsmtSF'].fillna(test_data['TotalBsmtSF'].median(), inplace=True)
     test_data['GarageArea'].fillna(test_data['GarageArea'].median(), inplace=True)
     test_data['KitchenQual'].fillna(test_data['KitchenQual'].mode()[0], inplace=True)
     
-def make_predictions(test_data: pd.DataFrame,X_train) -> np.ndarray:
+def make_predictions(test_data: pd.DataFrame,X_train_cate) -> np.ndarray:
     
     model_analysis(test_data)
     
@@ -98,9 +85,6 @@ def make_predictions(test_data: pd.DataFrame,X_train) -> np.ndarray:
     print("\n",test_cont_scaled.head())
     
     
-    #encoding categorical values
-    X_train_cate = X_train[cate_feat]
-    
     loaded_encoder = joblib.load('../models/encoder.joblib')
     loaded_encoder.fit(X_train_cate)
     
@@ -116,4 +100,3 @@ def make_predictions(test_data: pd.DataFrame,X_train) -> np.ndarray:
     
     print("The first 10 predicted SalePrice values of the test set are :\n",test_pred[:10])
     
-make_predictions(test_data,X_train)

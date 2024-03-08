@@ -1,3 +1,67 @@
+import pandas as pd
+import numpy as np
+import joblib
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import mean_squared_error,mean_squared_log_error,r2_score
+
+def model_analysis(data):
+    data.head()
+    print(f"\nshape of data {data.shape}")
+    print(f"\ndata coloumns : {data.columns}")
+    print(f"\nnull values in each features : {data.isnull().sum()}")
+    print(f"\ndata types of each features : {data.dtypes}")    
+    return
+    
+def data_splitting(train_data):
+    '''
+    now let's split the train_data set into train and test so that we can analyse 
+    the performance of the model in an unbiased way
+    '''
+
+    # taking features into one dataframe and target into another dataframe
+
+    X = train_data.drop('SalePrice', axis=1)
+    y = train_data['SalePrice']
+
+    # let's split the data - 80 % for training and 20% for testing
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+    print(f"shape after splitting : \n train data {X_train.shape} {y_train.shape} \n test data {X_test.shape} {y_test.shape}")
+    
+    return X_train, X_test, y_train, y_test
+
+def feature_selection(data):
+    # let's check which features are categorical and which are continuous
+    print("continuous features :\n", data.select_dtypes(include=['int64']).dtypes.head())
+    print("categorical features :\n", data.select_dtypes(include=['object']).dtypes.head())
+    
+    cate_feat = ['HouseStyle', 'Neighborhood', 'BldgType', 'KitchenQual', 'ExterQual'] 
+    cont_feat = ['OverallQual', 'YearBuilt', 'GrLivArea', 'TotalBsmtSF', 'GarageArea']
+    
+    print("The following features are picked")
+    print("\n categorical features")
+    for feat in cate_feat:
+        print(feat)
+    print("\n continuous features")
+    for feat in cont_feat:
+        print(feat)   
+    
+    print(type(cate_feat))
+    
+    return cate_feat,cont_feat
+
+def checkformissingval_in_data(feat,curr_data):
+    # handling missing values
+        
+    for val in feat:
+        count = curr_data[val].isnull().sum()
+        if(count != 0):
+            print(f"Null values in feature {val} is {count}")
+        else:
+            print(f"No null value in feature {val}")
+
 def scale_data(data_to_scale,cont_feat):
     #Scaling is a technique used to normalize the range of independent variables or features of data.
     # seperate the dataframe  into cont subset
@@ -128,13 +192,13 @@ def model_evaluation(y_test_pred,y_test,X_test_preprocessed,model):
 
 def compute_rmsle(y_test: np.ndarray, y_pred: np.ndarray, precision: int = 2) -> float:
     rmsle = np.sqrt(mean_squared_log_error(y_test, y_pred))
-    return round(rmsle, precision)   
-
-
-
+    return round(rmsle, precision)    
+    
 def build_model(data: pd.DataFrame) -> dict[str, str]:
     
     model_analysis(data)
+    
+    X_train, X_test, y_train, y_test = data_splitting(data)
            
     X_train_preprocessed,cate_feat = build_model_for_train(X_train,y_train)
     
@@ -157,4 +221,5 @@ def build_model(data: pd.DataFrame) -> dict[str, str]:
     
     rmse_dict = {"rmse":test_rmsle}
     
-    return rmse_dict
+    return rmse_dict,X_train_cate
+    
