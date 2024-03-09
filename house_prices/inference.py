@@ -55,6 +55,7 @@ def imputation(test_data):
 
 def make_predictions(test_data: pd.DataFrame, X_train_cate) -> np.ndarray:
 
+    #remove it
     model_analysis(test_data)
 
     cate_feat, cont_feat = feature_selection(test_data)
@@ -95,7 +96,7 @@ def make_predictions(test_data: pd.DataFrame, X_train_cate) -> np.ndarray:
     loaded_model = joblib.load('../models/model.joblib')
     test_pred = loaded_model.predict(test_preprocessed)
 
-    print("The first 10 predicted SalePrice values are :\n", test_pred[:10])
+    print("The first 10 predicted SalePrice values :\n", test_pred[:10])
 
 
 make_predictions(test_data)
