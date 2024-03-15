@@ -90,6 +90,6 @@ def build_model(data: pd.DataFrame) -> dict[str, str]:
     test_mse, test_r2 = model_evaluation(y_test_pred, y_test, X_test_preprocessed, model)  # noqa: E501
     test_rmsle = compute_rmsle(y_test, y_test_pred)
     joblib.dump(model, '../models/model.joblib')
-    rmse_dict = {"rmse": test_rmsle}
+    rmse_dict = {"rmsle": test_rmsle, "mse": test_mse, "r2": test_r2}
 
-    return rmse_dict['rmse']
+    return rmse_dict
