@@ -1,11 +1,7 @@
 import pandas as pd
 import numpy as np
 import joblib
-
-def feature_selection(data):
-    cate_feat = ['HouseStyle', 'Neighborhood', 'BldgType', 'KitchenQual', 'ExterQual']  # noqa: E501
-    cont_feat = ['OverallQual', 'YearBuilt', 'GrLivArea', 'TotalBsmtSF', 'GarageArea']  # noqa: E501
-    return cate_feat, cont_feat
+from app import cate_feat,cont_feat
 
 def imputation(test_data):
     test_data['TotalBsmtSF'].fillna(test_data['TotalBsmtSF'].median(), inplace=True)  # noqa: E501
@@ -15,7 +11,6 @@ def imputation(test_data):
 
 def make_predictions(input_data: pd.DataFrame) -> np.ndarray:
 
-    cate_feat, cont_feat = feature_selection(input_data)
     imputation(input_data)
     test_cont = input_data[cont_feat]
     test_cate = input_data[cate_feat]

@@ -5,6 +5,7 @@ from sklearn.metrics import mean_squared_error,mean_squared_log_error,r2_score
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.ensemble import RandomForestRegressor
+from app import cate_feat,cont_feat
 
 
 def data_splitting(data):
@@ -13,11 +14,6 @@ def data_splitting(data):
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)  # noqa: E501
     return X_train, X_test, y_train, y_test
 
-
-def feature_selection(data):
-    cate_feat = ['HouseStyle', 'Neighborhood', 'BldgType', 'KitchenQual', 'ExterQual']  # noqa: E501
-    cont_feat = ['OverallQual', 'YearBuilt', 'GrLivArea', 'TotalBsmtSF', 'GarageArea']  # noqa: E501
-    return cate_feat, cont_feat
 
 def scale_data(data_to_scale, cont_feat):
     data_cont = data_to_scale[cont_feat]
@@ -44,7 +40,6 @@ def encode_data(data_to_encode, cate_feat, X_train_cate):
 
 def build_model_for_train(X_train,y_train):
     
-    cate_feat,cont_feat = feature_selection(X_train)
     X_train_cont_scaled = scale_data(X_train,cont_feat)
     X_train_cate = X_train[cate_feat]
     X_train_cate_encoded = encode_data(X_train,cate_feat,X_train_cate)
@@ -54,7 +49,6 @@ def build_model_for_train(X_train,y_train):
 
 def build_model_for_test(X_test,y_test,X_train_cate):
 
-    cate_feat,cont_feat = feature_selection(X_test)
     X_test_cont_scaled = scale_data(X_test,cont_feat)
     X_test_cate_encoded = encode_data(X_test,cate_feat,X_train_cate)
     X_test_preprocessed = pd.concat([X_test_cont_scaled, X_test_cate_encoded], axis=1)
@@ -81,7 +75,7 @@ def compute_rmsle(y_test: np.ndarray, y_pred: np.ndarray, precision: int = 2) ->
 
 
 def build_model(data: pd.DataFrame) -> dict[str, str]:
-             
+          
     X_train, X_test, y_train, y_test = data_splitting(data)
 
     X_train_preprocessed,cate_feat = build_model_for_train(X_train,y_train) 
@@ -93,6 +87,6 @@ def build_model(data: pd.DataFrame) -> dict[str, str]:
     joblib.dump(model, '../models/model.joblib')   
     rmse_dict = {"rmse":test_rmsle}
 
-    return rmse_dict
+    return rmse_dict['rmse']
 
 
