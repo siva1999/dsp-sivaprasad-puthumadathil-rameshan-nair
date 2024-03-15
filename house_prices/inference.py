@@ -1,7 +1,8 @@
 import pandas as pd
 import numpy as np
 import joblib
-from app import cate_feat,cont_feat
+from app import cate_feat, cont_feat
+
 
 def imputation(test_data):
     test_data['TotalBsmtSF'].fillna(test_data['TotalBsmtSF'].median(), inplace=True)  # noqa: E501
@@ -21,12 +22,10 @@ def make_predictions(input_data: pd.DataFrame) -> np.ndarray:
     loaded_encoder = joblib.load('../models/encoder.joblib')
 
     test_cate_encoded = pd.DataFrame(loaded_encoder.transform(test_cate),
-                                     columns=loaded_encoder.get_feature_names_out(test_cate.columns))
+                                     columns=loaded_encoder.get_feature_names_out(test_cate.columns))  # noqa: E501
 
     test_preprocessed = pd.concat([test_cont_scaled, test_cate_encoded], axis=1)  # noqa: E501
-    
     loaded_model = joblib.load('../models/model.joblib')
     test_pred = loaded_model.predict(test_preprocessed)
 
     print("The first 10 predicted SalePrice values :\n", test_pred[:10])
-

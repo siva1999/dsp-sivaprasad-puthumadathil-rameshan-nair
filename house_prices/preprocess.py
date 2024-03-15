@@ -24,13 +24,14 @@ def encode_data(data_to_encode, cate_feat, X_train_cate):
     loaded_encoder.fit(X_train_cate)
     data_cate_encoded = pd.DataFrame(loaded_encoder.transform(data_cate),
         columns=loaded_encoder.get_feature_names_out(data_cate.columns))  # noqa: E128,E501
-    
     return data_cate_encoded
+
 
 def feature_selection(data):
     cate_feat = ['HouseStyle', 'Neighborhood', 'BldgType', 'KitchenQual', 'ExterQual']  # noqa: E501
     cont_feat = ['OverallQual', 'YearBuilt', 'GrLivArea', 'TotalBsmtSF', 'GarageArea']  # noqa: E501
     return cate_feat, cont_feat
+
 
 def imputation(test_data):
     # for replacing the null values of data
