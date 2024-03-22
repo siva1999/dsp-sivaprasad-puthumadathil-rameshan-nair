@@ -1,6 +1,7 @@
 import os
 import sys
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
 import joblib
 import pandas as pd
 from sqlalchemy import create_engine, Column, Integer,Float, Boolean, String
@@ -81,6 +82,8 @@ async def predict_features(features: FeatureInputRequest):
         db.add(feature_input)
         db.commit()
         db.refresh(feature_input)
+
+        return JSONResponse(content={"PredictedSalePrice": float(test_pred[0])})
     
     except Exception as e:
         db.rollback()
